@@ -12,7 +12,7 @@ export interface ISusNotes {
 
 export interface ISusScore {
   measure: number
-  BPMs: number[]
+  BPMs: Array<{ measure: number; tick: number; bpm: number }>
   BEATs: number[]
   shortNotes: ISusNotes[]
   holdNotes: ISusNotes[][]
@@ -30,18 +30,55 @@ export interface ISusScore {
  */
 function getBPMs(
   validLines: string[],
-  mea: number,
+  tpb: number,
+  beats: number[],
   basebpm: number = 120
-): number[] {
+): Array<{ measure: number; tick: number; bpm: number }> {
   const bpmList = lineToDef(validLines, /^BPM\d{2}:/, 3, 5)
-  const bpmDef = lineToDef(validLines, /^\d{3}08:/, 0, 3).map(def => {
-    if (!bpmList[def]) {
-      return undefined
-    }
-    return bpmList[def]
-  })
-  bpmDef[0] = !Number(bpmDef[0]) ? basebpm : bpmDef[0]
-  return defToArray(bpmDef, mea)
+  const bpmDef = validLines
+    .filter(line => line.match(/^\d{3}08:/))
+    .reduce(
+      (list, line) => {
+        const measure = Number(line.slice(0, 3))
+        const commands = line
+          .split(':')[1]
+          .trim()
+          .match(/.{1,2}/g)!
+        const BPMs = commands.map(ref => bpmList[Number(ref)])
+        const nOfBeat = beats[measure]
+
+        if (BPMs.length === 1) {
+          list.push({
+            bpm: BPMs[0],
+            measure,
+            tick: 0
+          })
+        } else {
+          const tickPerBPMChange = (tpb * nOfBeat) / BPMs.length
+          for (let i = 0; i < BPMs.length; i++) {
+            if (BPMs[i]) {
+              // invalid bpm reference meaning "maintaining"
+              list.push({
+                bpm: BPMs[i],
+                measure,
+                tick: tickPerBPMChange * i
+              })
+            }
+          }
+        }
+        return list
+      },
+      [] as Array<{ measure: number; tick: number; bpm: number }>
+    )
+  if (!bpmDef.find(def => def.measure === 0)) {
+    bpmDef.unshift({
+      bpm: basebpm,
+      measure: 0,
+      tick: 0
+    })
+  }
+  // bpmDef[0] = !Number(bpmDef[0]) ? basebpm : bpmDef[0]
+  return bpmDef
 }
 
 /**
@@ -214,7 +251,7 @@ export function getScore(sus: string, tickPerBeat: number = 192): ISusScore {
   const notes: ISusNotes[] = getNotes(validLines, tickPerBeat, BEATs)
   const score: ISusScore = {
     BEATs,
-    BPMs: getBPMs(validLines, measure, meta.getMeta(sus).BASEBPM),
+    BPMs: getBPMs(validLines, tickPerBeat, BEATs, meta.getMeta(sus).BASEBPM),
     airActionNotes: getLongLane(notes, 4),
     airNotes: notes.filter(note => note.laneType === 5),
     holdNotes: getLongLane(notes, 2),

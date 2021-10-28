@@ -6,9 +6,31 @@ const score = SusAnalyzer.getScore(sus)
 
 test('getScore().measure', () => expect(score.measure).toBe(23))
 test('getScore().BPMs', () => {
-  expect(score.BPMs[1]).toBe(120)
-  expect(score.BPMs[2]).toBe(80)
-  expect(SusAnalyzer.getScore('').BPMs[0]).toBe(120)
+  expect(score.BPMs[0]).toEqual({
+    measure: 0,
+    tick: 0,
+    bpm: 120
+  })
+  expect(score.BPMs[1]).toEqual({
+    measure: 2,
+    tick: 0,
+    bpm: 80
+  })
+  expect(score.BPMs[2]).toEqual({
+    measure: 3,
+    tick: 0,
+    bpm: 120
+  })
+  expect(score.BPMs[3]).toEqual({
+    measure: 3,
+    tick: 288,
+    bpm: 80
+  })
+  expect(SusAnalyzer.getScore('').BPMs[0]).toEqual({
+    measure: 0,
+    tick: 0,
+    bpm: 120
+  })
 })
 test('getScore().BEATs', () => {
   expect(score.BEATs[2]).toBe(4)
