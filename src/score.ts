@@ -136,7 +136,7 @@ function getNotes(
   return validLines
     .filter(line =>
       line.match(
-        /^\d{3}[1-5][0-9a-fA-F][0-9a-zA-Z]?:(\s*[0-9a-zA-Z][0-9a-gA-G])+\s*$/
+        /^\d{3}[1-9][0-9a-fA-F][0-9a-zA-Z]?:(\s*[0-9a-zA-Z][0-9a-gA-G])+\s*$/
       )
     )
     .map(line => line.split(':', 2))

@@ -101,9 +101,11 @@ export function getMeta(sus: string): ISusMeta {
   return getValidMetaLines(sus).reduce(
     (obj: ISusMeta, line: IValidSusLine) => {
       if (MoS.indexOf(line.key) > -1) {
+        // @ts-ignore
         obj[line.key] = line.value
       }
       if (MoN.indexOf(line.key) > -1 && Number(line.value)) {
+        // @ts-ignore
         obj[line.key] = Number(line.value)
       }
       if (line.key === 'DIFFICULTY') {
