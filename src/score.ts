@@ -19,6 +19,7 @@ export interface ISusScore {
   slideNotes: ISusNotes[][]
   airActionNotes: ISusNotes[][]
   airNotes: ISusNotes[]
+  guideNotes: ISusNotes[][]
 }
 
 /**
@@ -254,6 +255,7 @@ export function getScore(sus: string, tickPerBeat: number = 192): ISusScore {
     BPMs: getBPMs(validLines, tickPerBeat, BEATs, meta.getMeta(sus).BASEBPM),
     airActionNotes: getLongLane(notes, 4),
     airNotes: notes.filter(note => note.laneType === 5),
+    guideNotes: getLongLane(notes, 9),
     holdNotes: getLongLane(notes, 2),
     measure,
     shortNotes: notes.filter(note => note.laneType === 1),
